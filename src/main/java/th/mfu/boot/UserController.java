@@ -48,15 +48,27 @@ public class UserController {
         }
     }
 
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> getUser(@PathVariable String username) {
+        User user = repo.findByUsername(username);
+        if (user == null) {
+            return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<User>(user, HttpStatus.OK);
+        }
+    }
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
 
         // TODO: check if user with the id exists
-
+        if(repo.findById(id) == null){
+            return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
+        }
         // TODO: delete the user
-
+        repo.deleteById(id);
         // TODO: remove below and return proper status
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
 }
