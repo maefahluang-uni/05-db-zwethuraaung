@@ -48,7 +48,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/users/{username}")
     public ResponseEntity<User> getUser(@PathVariable String username) {
         User user = repo.findByUsername(username);
         if (user == null) {
