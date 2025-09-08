@@ -1,0 +1,113 @@
+<html>
+<head>
+    <title>User Registration and Listing</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+    <h1>User Registration</h1>
+    <form id="registrationForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="displayname">Display Name:</label>
+        <input type="text" id="displayname" name="displayname" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <button type="submit">Register</button>
+    </form>
+
+    <br>
+
+    <h1>User List</h1>
+    <div id="userList">
+        <!-- User list will be displayed here -->
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Register User
+            $("#registrationForm").submit(function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                var username = $("#username").val();
+                var displayname = $("#displayname").val();
+                var email = $("#email").val();
+
+                $.ajax({
+                    url: "http://localhost:8080/users", // Your Spring Boot API endpoint
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        "username": username,
+                        "displayname": displayname,
+                        "email": email
+                    }),
+                    success: function(response) {
+                        // Handle successful registration
+                        alert("User registered successfully!");
+                        $("#registrationForm")[0].reset(); // Clear the form
+                        loadUserList(); // Refresh the user list
+                    },
+                    error: function(error) {
+                        // Handle registration errors
+                        console.error("Registration failed:", error);
+                        alert("Registration failed. Please check your input.");
+                    }
+                });
+            });
+
+            // Load User List
+            function loadUserList() {
+                $.ajax({
+                    url: "http://localhost:8080/users", // Your Spring Boot API endpoint
+                    type: "GET",
+                    success: function(response) {
+                        // Display the user list
+                        $("#userList").html(""); // Clear previous list
+                        $.each(response, function(index, user) {
+                            $("#userList").append("<p>" + user.username + " - " + user.displayname + " - " + user.email) 
+                            //TODO: add a delete button here
+                            
+                        });
+                    },
+                    error: function(error) {
+                        // Handle errors
+                        console.error("Error loading user list:", error);
+                        $("#userList").html("<p>Error loading user list.</p>");
+                    }
+                });
+            }
+
+            
+            // Delete User
+            $("#userList").on("click", ".delete-user", function() {
+                var id = $(this).data("id");
+
+                if (confirm("Are you sure you want to delete user: " + id + "?")) {
+                    $.ajax({
+                        url: "http://localhost:8080/users/" + id, // Your Spring Boot API endpoint
+                        type: "DELETE",
+                        success: function(response) {
+                            // Handle successful deletion
+                            alert("User deleted successfully!");
+                            loadUserList(); // Refresh the user list
+                        },
+                        error: function(error) {
+                            // Handle deletion errors
+                            console.error("User deletion failed:", error);
+                            alert("User deletion failed.");
+                        }
+                    });
+                }
+            });
+
+            // Initial load of user list
+            loadUserList();
+        });
+    </script>
+
+</body>
+</html>
